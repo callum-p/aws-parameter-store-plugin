@@ -251,7 +251,7 @@ public class AwsParameterStoreService {
           start = path.length();
         }
       } else if(NAMING_ABSOLUTE.equals(naming)) {
-        start = 1;
+        start = name[0] == '/' ? 1 : 0;
       } else {
         start = name.lastIndexOf('/')+1;
       }
