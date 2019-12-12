@@ -28,6 +28,11 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.BasicSessionCredentials;
+
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.RegionUtils;
@@ -72,16 +77,25 @@ public class AwsParameterStoreService {
 
   private String credentialsId;
   private String regionName;
+  private String accessKeyId;
+  private String secretAccessKey;
+  private String sessionToken;
 
   /**
    * Creates a new {@link AwsParameterStoreService}.
    *
-   * @param credentialsId  AWS credentials identifier
-   * @param regionName     AWS region name
+   * @param credentialsId   AWS credentials identifier
+   * @param regionName      AWS region name
+   * @param accessKeyId     AWS access key ID
+   * @param secretAccessKey AWS secret access key
+   * @param sessionToken    AWS session token
    */
-  public AwsParameterStoreService(String credentialsId, String regionName) {
+  public AwsParameterStoreService(String credentialsId, String regionName, String accessKeyId, String secretAccessKey, String sessionToken) {
     this.credentialsId = credentialsId;
     this.regionName = StringUtils.defaultString(regionName, DEFAULT_REGION);
+    this.accessKeyId = accessKeyId;
+    this.secretAccessKey = secretAccessKey;
+    this.sessionToken = sessionToken;
   }
 
   /**
@@ -103,7 +117,7 @@ public class AwsParameterStoreService {
         }
       }
 
-      AmazonWebServicesCredentials credentials = getAWSCredentials(credentialsId);
+      AWSCredentials credentials = getAWSCredentials(credentialsId, accessKeyId, secretAccessKey, sessionToken);
       if(credentials == null) {
         client = AWSSimpleSystemsManagementClient.
                    builder().
@@ -113,7 +127,7 @@ public class AwsParameterStoreService {
       } else {
         client = AWSSimpleSystemsManagementClient.
                    builder().
-                   withCredentials(credentials).
+                   withCredentials(new AWSStaticCredentialsProvider(credentials)).
                    withClientConfiguration(clientConfiguration).
                    withRegion(regionName).
                    build();
@@ -126,11 +140,32 @@ public class AwsParameterStoreService {
    * Gets AWS credentials.
    *
    * @param credentialsId Jenkins credentials identifier
+   * @param accessKeyId     AWS access key ID
+   * @param secretAccessKey AWS secret access key
+   * @param sessionToken    AWS session token
    * @return AWS credentials for <code>credentialsId</code> that can be used
    * for AWS calls
    */
-  private AmazonWebServicesCredentials getAWSCredentials(String credentialsId) {
-    return AWSCredentialsHelper.getCredentials(credentialsId, Jenkins.getActiveInstance());
+  private AWSCredentials getAWSCredentials(String credentialsId, String accessKeyId, String secretAccessKey, String sessionToken) {
+    if (accessKeyId != null && secretAccessKey != null) {
+      if (sessionToken != null) {
+        BasicSessionCredentials bsc = new BasicSessionCredentials(
+          accessKeyId,
+          secretAccessKey,
+          sessionToken
+        );
+        return new AWSStaticCredentialsProvider(bsc).getCredentials();
+      } else {
+        BasicAWSCredentials bac = new BasicAWSCredentials(accessKeyId, secretAccessKey);
+        return new AWSStaticCredentialsProvider(bac).getCredentials();
+      }
+    }
+    AmazonWebServicesCredentials credentials = AWSCredentialsHelper.getCredentials(credentialsId, Jenkins.getActiveInstance());
+    if (credentials != null) {
+      return credentials.getCredentials();
+    }
+
+    return null;
   }
 
   /**

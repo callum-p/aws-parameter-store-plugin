@@ -73,7 +73,12 @@ public class AwsParameterStoreBuildWrapperTest {
   public String naming;
   @Parameter(4)
   public String namePrefixes;
-
+  @Parameter(5)
+  public String accessKeyId;
+  @Parameter(6)
+  public String secretAccessKey;
+  @Parameter(7)
+  public String sessionToken;
 
   @Parameters
   public static Collection<Object[]> data() {
@@ -84,6 +89,9 @@ public class AwsParameterStoreBuildWrapperTest {
           false,
           CREDENTIALS_AWS_ADMIN,
           "basename",
+          "",
+          "",
+          "",
           ""
         },
         {
@@ -91,6 +99,9 @@ public class AwsParameterStoreBuildWrapperTest {
           true,
           CREDENTIALS_AWS_NO_DESCRIBE,
           "relative",
+          "",
+          "",
+          "",
           ""
         },
         {
@@ -98,7 +109,10 @@ public class AwsParameterStoreBuildWrapperTest {
           false,
           CREDENTIALS_AWS_NO_DESCRIBE,
           "",
-          "name_prefix"
+          "name_prefix",
+          "",
+          "",
+          ""
         }
       }
     );
@@ -117,13 +131,25 @@ public class AwsParameterStoreBuildWrapperTest {
    */
   @Test
   public void testConstructor() {
-    AwsParameterStoreBuildWrapper awsParameterStoreBuildWrapper = new AwsParameterStoreBuildWrapper(credentialsId, REGION_NAME, path, recursive, naming, namePrefixes);
+    AwsParameterStoreBuildWrapper awsParameterStoreBuildWrapper = new AwsParameterStoreBuildWrapper(
+      credentialsId,
+      REGION_NAME,
+      path,
+      recursive,
+      naming,
+      namePrefixes,
+      accessKeyId,
+      secretAccessKey,
+      sessionToken);
     Assert.assertEquals("credentialsId", credentialsId, awsParameterStoreBuildWrapper.getCredentialsId());
     Assert.assertEquals("regionName", REGION_NAME, awsParameterStoreBuildWrapper.getRegionName());
     Assert.assertEquals("path", path, awsParameterStoreBuildWrapper.getPath());
     Assert.assertEquals("recursive", recursive, awsParameterStoreBuildWrapper.getRecursive());
     Assert.assertEquals("naming", naming, awsParameterStoreBuildWrapper.getNaming());
     Assert.assertEquals("namePrefixes", namePrefixes, awsParameterStoreBuildWrapper.getNamePrefixes());
+    Assert.assertEquals("accessKeyId", accessKeyId, awsParameterStoreBuildWrapper.getAccessKeyId());
+    Assert.assertEquals("secretAccessKey", secretAccessKey, awsParameterStoreBuildWrapper.getSecretAccessKey());
+    Assert.assertEquals("sessionToken", sessionToken, awsParameterStoreBuildWrapper.getSessionToken());
   }
 
   /**
@@ -138,6 +164,9 @@ public class AwsParameterStoreBuildWrapperTest {
     awsParameterStoreBuildWrapper.setRecursive(recursive);
     awsParameterStoreBuildWrapper.setNaming(naming);
     awsParameterStoreBuildWrapper.setNamePrefixes(namePrefixes);
+    awsParameterStoreBuildWrapper.setAccessKeyId(accessKeyId);
+    awsParameterStoreBuildWrapper.setSecretAccessKey(secretAccessKey);
+    awsParameterStoreBuildWrapper.setSessionToken(sessionToken);
 
     Assert.assertEquals("credentialsId", credentialsId, awsParameterStoreBuildWrapper.getCredentialsId());
     Assert.assertEquals("regionName", REGION_NAME, awsParameterStoreBuildWrapper.getRegionName());
@@ -145,6 +174,9 @@ public class AwsParameterStoreBuildWrapperTest {
     Assert.assertEquals("recursive", recursive, awsParameterStoreBuildWrapper.getRecursive());
     Assert.assertEquals("naming", naming, awsParameterStoreBuildWrapper.getNaming());
     Assert.assertEquals("namePrefixes", StringUtils.stripToNull(namePrefixes), awsParameterStoreBuildWrapper.getNamePrefixes());
+    Assert.assertEquals("accessKeyId", StringUtils.stripToNull(accessKeyId), awsParameterStoreBuildWrapper.getAccessKeyId());
+    Assert.assertEquals("secretAccessKey", StringUtils.stripToNull(secretAccessKey), awsParameterStoreBuildWrapper.getSecretAccessKey());
+    Assert.assertEquals("sessionToken", StringUtils.stripToNull(sessionToken), awsParameterStoreBuildWrapper.getSessionToken());
   }
 
   /**
@@ -152,7 +184,16 @@ public class AwsParameterStoreBuildWrapperTest {
    */
   @Test
   public void testSetup() {
-    AwsParameterStoreBuildWrapper awsParameterStoreBuildWrapper = new AwsParameterStoreBuildWrapper(credentialsId, REGION_NAME, path, recursive, naming, namePrefixes);
+    AwsParameterStoreBuildWrapper awsParameterStoreBuildWrapper = new AwsParameterStoreBuildWrapper(
+      credentialsId,
+      REGION_NAME,
+      path,
+      recursive,
+      naming,
+      namePrefixes,
+      accessKeyId,
+      secretAccessKey,
+      sessionToken);
     try {
       awsParameterStoreBuildWrapper.setUp((SimpleBuildWrapper.Context)null, null, null, null, null, null);
     } catch(Exception e) {

@@ -1,0 +1,17 @@
+version: '3.6'
+services:
+  build:
+    image: maven:3-ibmjava-8
+    entrypoint: mvn package
+    volumes:
+      - .:/build
+      - .m2:/root/.m2
+    working_dir: /build
+
+  test:
+    image: maven:3-ibmjava-8
+    entrypoint: mvn test
+    volumes:
+      - .:/build
+      - .m2:/root/.m2
+    working_dir: /build

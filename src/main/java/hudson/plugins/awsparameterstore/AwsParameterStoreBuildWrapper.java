@@ -71,6 +71,9 @@ public class AwsParameterStoreBuildWrapper extends SimpleBuildWrapper {
   private Boolean recursive;
   private String naming;
   private String namePrefixes;
+  private String accessKeyId;
+  private String secretAccessKey;
+  private String sessionToken;
 
   private transient AwsParameterStoreService parameterStoreService;
 
@@ -79,7 +82,7 @@ public class AwsParameterStoreBuildWrapper extends SimpleBuildWrapper {
    */
   @DataBoundConstructor
   public AwsParameterStoreBuildWrapper() {
-    this(null, null, null, false, null, null);
+    this(null, null, null, false, null, null, null, null, null);
   }
 
   /**
@@ -91,15 +94,30 @@ public class AwsParameterStoreBuildWrapper extends SimpleBuildWrapper {
    * @param recursive       fetch all parameters within a hierarchy
    * @param naming          environment variable naming: basename, absolute, relative
    * @param namePrefixes    filter parameters by Name with beginsWith filter
+   * @param accessKeyId     AWS access key ID
+   * @param secretAccessKey AWS secret access key
+   * @param sessionToken    AWS session token
    */
   @Deprecated
-  public AwsParameterStoreBuildWrapper(String credentialsId, String regionName, String path, Boolean recursive, String naming, String namePrefixes) {
+  public AwsParameterStoreBuildWrapper(
+      String credentialsId,
+      String regionName,
+      String path,
+      Boolean recursive,
+      String naming,
+      String namePrefixes,
+      String accessKeyId,
+      String secretAccessKey,
+      String sessionToken) {
     this.credentialsId = credentialsId;
     this.regionName = regionName;
     this.path = path;
     this.recursive = recursive;
     this.naming = naming;
     this.namePrefixes = namePrefixes;
+    this.accessKeyId = accessKeyId;
+    this.secretAccessKey = secretAccessKey;
+    this.sessionToken = sessionToken;
   }
 
   /**
@@ -210,9 +228,63 @@ public class AwsParameterStoreBuildWrapper extends SimpleBuildWrapper {
     this.namePrefixes = StringUtils.stripToNull(namePrefixes);
   }
 
+  /**
+   * Gets Access key ID
+   * @return accessKeyId.
+   */
+  public String getAccessKeyId() {
+    return accessKeyId;
+  }
+
+  /**
+   * Sets the AWS access key ID
+   *
+   * @param accessKeyId  the AWS access key ID
+   */
+  @DataBoundSetter
+  public void setAccessKeyId(String accessKeyId) {
+    this.accessKeyId = StringUtils.stripToNull(accessKeyId);
+  }
+
+  /**
+   * Gets Secret access key
+   * @return secretAccessKey.
+   */
+  public String getSecretAccessKey() {
+    return secretAccessKey;
+  }
+
+  /**
+   * Sets the AWS secret access key
+   *
+   * @param secretAccessKey  the AWS secret access key
+   */
+  @DataBoundSetter
+  public void setSecretAccessKey(String secretAccessKey) {
+    this.secretAccessKey = StringUtils.stripToNull(secretAccessKey);
+  }
+
+  /**
+   * Gets session token
+   * @return sessionToken.
+   */
+  public String getSessionToken() {
+    return sessionToken;
+  }
+
+  /**
+   * Sets the AWS session token
+   *
+   * @param sessionToken  the AWS session token
+   */
+  @DataBoundSetter
+  public void setSessionToken(String sessionToken) {
+    this.sessionToken = StringUtils.stripToNull(sessionToken);
+  }
+
   @Override
   public void setUp(Context context, Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener, EnvVars initialEnvironment) throws IOException, InterruptedException {
-    AwsParameterStoreService awsParameterStoreService = new AwsParameterStoreService(credentialsId, regionName);
+    AwsParameterStoreService awsParameterStoreService = new AwsParameterStoreService(credentialsId, regionName, accessKeyId, secretAccessKey, sessionToken);
     awsParameterStoreService.buildEnvVars(context, path, recursive, naming, namePrefixes);
   }
 
